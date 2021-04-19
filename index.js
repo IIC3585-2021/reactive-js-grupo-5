@@ -8,7 +8,7 @@ function startGame() {
     playerOne = new NewComponent(0, 570, "pink");
     playerTwo = new NewComponent(970, 570, "orange");
 
-    obstacle1l = new NewObstacle(150, 40, 50,500);
+    obstacle1l = new NewObstacle(150, 40, 50, 500);
     obstacle1r = new NewObstacle(150, 40, 800,500);
     obstacle2l = new NewObstacle(50, 150, 150, 350);
     obstacle2r = new NewObstacle(50, 150, 800, 350);
@@ -38,6 +38,12 @@ function startGame() {
     obstacle12m = new NewObstacle(300, 20, 350,200);
     obstacle12r = new NewObstacle(270, 20, 730,230);
     obstacleFinal = new NewObstacle(700, 30, 150, 100);
+
+    obstacles = [obstacle1l, obstacle10r, obstacle2l, obstacle2r, obstacle3l, obstacle3r, 
+        obstacle4l, obstacle4r, obstacle5r, obstacle5l, obstacle6l, obstacle6r, 
+        obstacle7l, obstacle7r, obstacle8l, obstacle8r, obstacle9l, obstacle9r,
+    obstacle10l, obstacle10r, obstacle11l, obstacle11r, obstacle12l, obstacle12r, 
+    obstacle12m, obstacleFinal];
 
     trophy = new NewImage(50, 50, "trophy.jpeg" , 485, 50);
 
@@ -82,7 +88,9 @@ var myGameArea = {
 }
 
 function updateGameArea() {
+    myGameArea.clear();
     trophy.update();
+    obstacles.map((obstacle) => obstacle.update());
     playerOne.newPos();
     playerOne.update();
     playerTwo.newPos();
@@ -104,9 +112,39 @@ function NewComponent(x, y, color) {
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
     this.newPos = function() {
-        this.x += this.speedx
-        this.y += this.speedy   
+        if (!isInvalid(this.x + this.speedx, this.y + this.speedy, this.width, this.height)){
+            this.x += this.speedx
+            this.y += this.speedy 
+        }
+          
     }
+}
+function isInvalid(x, y, width, height){
+
+    var leftX = x;
+    var supY = y;
+    var infY = y + height;
+    var rightX = x + width;
+
+    var componentOptions = [[leftX, supY], [leftX, infY], [rightX, supY], [rightX, infY]];
+
+    var overlapAll = obstacles.map((obstacle) => componentOptions.map((position) => 
+        intersects(obstacle.x, obstacle.width, obstacle.y, obstacle.height, position[0], position[1]))
+         .reduce((x,y) => x || y)
+         )
+    return overlapAll.reduce((x,y) => x || y);
+
+
+}
+
+function intersects (infx, width, infy, height, x, y){
+
+    var verticalInf = infy < y ;
+    var verticalSup = (infy + height) > y;
+    var horizontalInf = infx < x;
+    var horizontalSup = (infx + width) > x;
+    
+    return verticalInf && verticalSup && horizontalInf && horizontalSup;
 }
 
 function NewObstacle(width, height, x, y) {
@@ -117,6 +155,10 @@ function NewObstacle(width, height, x, y) {
     ctx = myGameArea.context;
     ctx.fillStyle = "lightblue";
     ctx.fillRect(this.x, this.y, this.width, this.height);
+    this.update = function() {
+        ctx.fillStyle = "lightblue";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
 }
 
 function NewImage(width, height, src, x, y) {
