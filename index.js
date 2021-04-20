@@ -135,8 +135,10 @@ function NewComponent(x, y, color) {
     }
     this.newPos = function() {
         if (!isInvalid(this.x + this.speedx, this.y + this.speedy, this.width, this.height)){
-            this.x += this.speedx
-            this.y += this.speedy 
+            if (this.x + this.speedx <= 970 && this.x + this.speedx >= 0 && this.y + this.speedy <= 570 && this.y + this.speedy >= 0) {
+                this.x += this.speedx
+                this.y += this.speedy 
+            }
         }else{
             if(difficult){
                 myGameArea.stop();
