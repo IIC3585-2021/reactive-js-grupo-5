@@ -8,9 +8,17 @@
   <body>
       <h1>GO AS FAST AS YOU CAN!</h1>
       <h2>If you want the trophy</h2>
-      <h2>don´t waste your time and GO!</h2>
+      <h2>don't waste your time and GO!</h2>
+      <h3>EASY: the walls will just block your way</h3>
+      <h3>HARD: touching the walls will make you lose</h3>
+      <h3 style="color:rgb(206, 91, 110)">PLAYER ONE: WASD</h3>
+      <h3 style="color:orange">PLAYER TWO: USE ARROWS</h3>
+
+
+      
       <div id="board"></div>
-    <button id="startGame" onclick="startGame()">Start Game</button>
+    <button id="startGame" onclick="startGame()">Start Game EASY</button>
+    <button id="startGame" onclick="startGame(true)">Start Game HARD</button>
   </body>
   <script src="index.js"></script>
 </html>

@@ -2,12 +2,14 @@ var trophy;
 var playerOne;
 var playerTwo;
 
-function startGame() {
+function startGame(hard=false) {
     myGameArea.start();
 
-    playerOne = new NewComponent(0, 570, "pink");
-    playerTwo = new NewComponent(970, 570, "orange");
+    difficult = hard;
 
+    playerOne = new NewComponent(0, 570, "rgb(206, 91, 110)");
+    playerTwo = new NewComponent(970, 570, "orange");
+    
     obstacle1l = new NewObstacle(150, 40, 50, 500);
     obstacle1r = new NewObstacle(150, 40, 800,500);
     obstacle2l = new NewObstacle(50, 150, 150, 350);
@@ -50,21 +52,31 @@ function startGame() {
     const { fromEvent } = rxjs; 
     const { map } = rxjs.operators;
 
-    const playerOneObserver = fromEvent(document, "keydown").pipe(
-        map((event) => event.key)
+    const playersObserver = fromEvent(document, "keydown").pipe(
+        map((event) => event.keyCode)
     );
 
-    playerOneObserver.subscribe((key) => {
+    playersObserver.subscribe((key) => {
         const direction = {
-            ArrowUp: { x: 0, y: -1 },
-            ArrowDown: { x: 0, y: 1 },
-            ArrowLeft: { x: -1, y: 0 },
-            ArrowRight: { x: 1, y: 0 },
+            38: { x: 0, y: -1 },
+            40: { x: 0, y: 1 },
+            37: { x: -1, y: 0 },
+            39: { x: 1, y: 0 },
+            87: { x: 0, y: -1 },
+            83: { x: 0, y: 1 },
+            65: { x: -1, y: 0 },
+            68: { x: 1, y: 0 },
         };
-        playerOne.speedx = direction[key]["x"];
-        playerOne.speedy = direction[key]["y"];
+        if([38, 40, 37, 39].includes(key)){
+            playerTwo.speedx = direction[key]["x"];
+            playerTwo.speedy = direction[key]["y"];
+        }
+        if([87, 83, 65, 68].includes(key)){
+            playerOne.speedx = direction[key]["x"];
+            playerOne.speedy = direction[key]["y"];
+        }
+        
     });
-
 
 
 }
@@ -91,10 +103,20 @@ function updateGameArea() {
     myGameArea.clear();
     trophy.update();
     obstacles.map((obstacle) => obstacle.update());
-    playerOne.newPos();
     playerOne.update();
-    playerTwo.newPos();
     playerTwo.update();
+    if (playerTwo.newPos()){
+        alert("Player 2 lost :(")
+    }
+    if (playerOne.newPos()){
+        alert("Player 1 lost :(")
+    }
+    if (playerOne.winner()){
+        alert("Player 1 wins!!!!")
+    }
+    if (playerTwo.winner()){
+        alert("Player 2 wins!!!!")
+    }    
 }
 
 function NewComponent(x, y, color) {
@@ -115,8 +137,32 @@ function NewComponent(x, y, color) {
         if (!isInvalid(this.x + this.speedx, this.y + this.speedy, this.width, this.height)){
             this.x += this.speedx
             this.y += this.speedy 
+        }else{
+            if(difficult){
+                myGameArea.stop();
+                return true;
+            }
         }
           
+    }
+    this.winner = function() {
+
+        var componentOptions = [[this.x, this.y],
+        [this.x, this.y + this.height],
+        [this.x + this.width, this.y],
+        [this.x + this.width, this.y + this.height]];
+        
+        var winner = componentOptions.map((position) => intersects(
+            trophy.x, 
+            trophy.width, 
+            trophy.y, 
+            trophy.height, 
+            position[0], 
+            position[1])).reduce((x,y) => x || y);
+        if (winner){
+            myGameArea.stop();
+        return winner;
+        }
     }
 }
 function isInvalid(x, y, width, height){
@@ -143,7 +189,7 @@ function intersects (infx, width, infy, height, x, y){
     var verticalSup = (infy + height) > y;
     var horizontalInf = infx < x;
     var horizontalSup = (infx + width) > x;
-    
+
     return verticalInf && verticalSup && horizontalInf && horizontalSup;
 }
 
